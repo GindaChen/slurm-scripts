@@ -1,8 +1,6 @@
 #!/bin/bash
 
-MODEL="facebook/opt-125m"
-
-mkdir -p output_tmp
+MODEL="deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
 
 python run_batch_server.py \
 --disable-log-requests \
@@ -11,7 +9,4 @@ python run_batch_server.py \
 --enable-prefix-caching \
 --model $MODEL \
 -i examples/input.txt \
--o output_tmp/output.jsonl \
---output-tmp-dir output_tmp/ \
---custome-request-script examples/template.py \
---enforce-eager
+--custome-request-script examples/template.py

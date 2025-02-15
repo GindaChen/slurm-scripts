@@ -29,7 +29,7 @@ usage: run_batch.py [-h] -i INPUT_FILE -o OUTPUT_FILE [--response-role RESPONSE_
                     [--compilation-config COMPILATION_CONFIG] [--kv-transfer-config KV_TRANSFER_CONFIG] [--worker-cls WORKER_CLS] [--generation-config GENERATION_CONFIG] [--override-generation-config OVERRIDE_GENERATION_CONFIG] [--enable-sleep-mode]
                     [--calculate-kv-scales] [--disable-log-requests] [--max-log-len MAX_LOG_LEN] [--enable-metrics] [--url URL] [--port PORT] [--enable-prompt-tokens-details]
 """
-import datetime
+from datetime import datetime
 import importlib.util
 import sys
 import asyncio
@@ -82,7 +82,7 @@ def parse_args():
     parser.add_argument(
         "-o",
         "--output-file",
-        required=True,
+        required=False,
         type=str,
         default=f"output_{now}.jsonl",
         help="The path or url to a single output file. Currently supports "

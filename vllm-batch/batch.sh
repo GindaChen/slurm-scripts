@@ -1,10 +1,12 @@
 #!/bin/bash
-#SBATCH --qos=shared
+## #SBATCH --qos=shared
+#SBATCH --qos=debug
 #SBATCH --time=1
 #SBATCH --nodes=1
 #SBATCH --constraint=gpu
 #SBATCH --gpus-per-node=1
 #SBATCH --ntasks-per-node=1
+#SBATCH --time=00:10:00
 
 echo "Starting script"
 pwd
@@ -18,5 +20,5 @@ conda activate vllm
 
 echo "Start Execution"
 
-srun examples/simple.sh
-srun examples/simple_template.sh
+bash examples/simple.sh
+bash examples/simple_template.sh
