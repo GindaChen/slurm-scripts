@@ -140,6 +140,10 @@ def parse_args():
                         default=None,
                         help="Customize the request script.")
 
+    parser.add_argument("--checkpoint-frequency",
+                        type=int,
+                        default=None,
+                        help="The frequency of checkpoint.")
     return parser.parse_args()
 
 
@@ -280,12 +284,12 @@ async def write_file(path_or_url: str, batch_outputs: List[BatchRequestOutput],
             ) as f:
                 logger.info("Writing outputs to temporary local file %s",
                             f.name)
-                await write_local_file(f.name, batch_outputs)
+                await write_local_file(f.name, batch_outputs, suffix_id=suffix_id)
                 logger.info("Uploading outputs to %s", path_or_url)
                 await upload_data(path_or_url, f.name, from_file=True)
     else:
         logger.info("Writing outputs to local file %s", path_or_url)
-        await write_local_file(path_or_url, batch_outputs)
+        await write_local_file(path_or_url, batch_outputs, suffix_id=suffix_id)
 
 
 def make_error_request_output(request: BatchRequestInput,
@@ -381,6 +385,28 @@ async def prepare_requests(input_file: str, custome_request_script: str):
         return await prepare_requests_default(input_file)
     else:
         return await prepare_requests_custome(input_file, custome_request_script)
+
+async def async_as_completed(tasks, every=1):
+    """
+    Yield lists of completed results from tasks as soon as each list reaches `every` items.
+    
+    Args:
+        tasks (Iterable[asyncio.Task]): An iterable of asyncio tasks or coroutines.
+        every (int): The batch size to yield.
+    
+    Yields:
+        List: A list of completed results.
+    """
+    batch = []
+    for completed in asyncio.as_completed(tasks):
+        result = await completed
+        batch.append(result)
+        if len(batch) >= every:
+            yield batch
+            batch = []
+    # Yield any remaining results that didn't form a full batch.
+    if batch:
+        yield batch
 
 
 async def main(args):
@@ -497,8 +523,20 @@ async def main(args):
                     "are supported in the batch endpoint.",
                 ))
 
+    # with tracker.pbar():
+    #     responses = await asyncio.gather(*response_futures)
+    checkpoint_frequency = args.checkpoint_frequency
+    if checkpoint_frequency is None:
+        checkpoint_frequency = len(response_futures)
+
+    responses = []
     with tracker.pbar():
-        responses = await asyncio.gather(*response_futures)
+        idx = 0
+        async for batch in async_as_completed(response_futures, every=checkpoint_frequency):
+            responses.extend(batch)
+            output_file = f"{args.output_file}.{idx}.tmp"
+            await write_file(output_file, batch, args.output_tmp_dir)
+            idx += 1
 
     await write_file(args.output_file, responses, args.output_tmp_dir)
 
