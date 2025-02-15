@@ -10,4 +10,4 @@ python run_batch_server.py \
 --model $MODEL \
 -i examples/input.txt \
 --custome-request-script examples/template.py \
---checkpoint-frequency 
+--checkpoint-frequency 5
