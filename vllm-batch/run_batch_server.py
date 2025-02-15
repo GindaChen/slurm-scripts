@@ -284,12 +284,12 @@ async def write_file(path_or_url: str, batch_outputs: List[BatchRequestOutput],
             ) as f:
                 logger.info("Writing outputs to temporary local file %s",
                             f.name)
-                await write_local_file(f.name, batch_outputs, suffix_id=suffix_id)
+                await write_local_file(f.name, batch_outputs)
                 logger.info("Uploading outputs to %s", path_or_url)
                 await upload_data(path_or_url, f.name, from_file=True)
     else:
         logger.info("Writing outputs to local file %s", path_or_url)
-        await write_local_file(path_or_url, batch_outputs, suffix_id=suffix_id)
+        await write_local_file(path_or_url, batch_outputs)
 
 
 def make_error_request_output(request: BatchRequestInput,
