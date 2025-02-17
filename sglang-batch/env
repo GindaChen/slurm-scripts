@@ -1,0 +1,3 @@
+module load conda
+module load cudatoolkit/12.4
+conda activate sglang
